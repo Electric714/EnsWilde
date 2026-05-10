@@ -69,17 +69,21 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
     var hasCustomUI: Bool { customModuleName != nil }
     
     func apply() async throws {
-        // TODO: Integrate with existing SparseRestore / ToolRunner / BookRestoreApplyTask
-        // For now, placeholder that logs. Real impl will iterate patchDefinitions and call appropriate apply functions.
         print("[PatchLoader] Applying JSONPatchModule: \(title) (\(patchDefinitions.count) definitions)")
-        // Example: for MobileGestalt, use existing MobileGestaltApplyTask logic
-        // For FileWrite (e.g. Wallet bg), use BookRestoreFile or custom
-        // This will be wired in later steps.
+        for def in patchDefinitions {
+            print("  - \(def.operation) \(def.targetType) key=\(def.key) value=\(def.value?.value ?? "nil") targetPath=\(def.targetPath ?? "N/A")")
+        }
+        // POC wiring: simulate apply success (in real impl, delegate to SparseRestore/BookRestoreApplyTask based on targetType)
+        // For MobileGestalt: would load/modify MG plist and push via AFC + itunesstored restart (see MobileGestaltApplyTask)
+        // For Plist: edit plist and push
+        // For now, mark as applied in UserDefaults for demo
+        UserDefaults.standard.set(true, forKey: "patch_\(id)_applied")
+        UserDefaults.standard.synchronize()
     }
     
     @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View {
         // Generic toggle UI will be provided by main app's dynamic list
-        // Custom modules override this
+        // Custom modules override this to provide e.g. image picker for Wallet
         EmptyView()
     }
 }
