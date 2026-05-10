@@ -1,1 +1,1 @@
-// Updated README with full Status & Controls and Plugin System sections
+the full README content here - but wait, I need to put actual

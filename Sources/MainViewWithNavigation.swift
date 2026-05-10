@@ -1,1 +1,1 @@
-// Updated with dynamic plugin loading + Status & Controls tab hooked into bottom navigation
+full content

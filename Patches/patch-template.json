@@ -1,15 +1,1 @@
-{
-  "id": "example-patch",
-  "title": "Example Patch",
-  "description": "Template for new patches",
-  "iosVersion": "26.2b1",
-  "category": "Status & Controls",
-  "type": "toggle",
-  "keys": [
-    {
-      "domain": "MobileGestalt",
-      "key": "ExampleKey",
-      "value": true
-    }
-  ]
-}
+full
