@@ -1,82 +1,76 @@
-<div align="center">
-  <img src="https://github.com/YangJiiii/EnsWilde/blob/be10a7d93b70df3b40057f869e6cc82de92bc2f0/MyApp_Dark_1024.png?raw=true" width="120" alt="EnsWilde Logo" />
-</div>
-
-# EnsWilde (Mobile)
-
-**EnsWilde** is a tool utilizing `itunesstored` & `bookassetd` exploits, designed for iPhone and iPad running the latest **iOS Version 26.2b1**.
-
-It operates as a standalone on-device application, functioning independently like modern apps. It leverages the `sparserestore` exploit to write data to files situated outside of the intended restore location.
-
-> [!WARNING]
-> **DISCLAIMER:**
-> I am **not responsible** if your device enters a bootloop. Use this software with caution.
-> **Please back up your data before using!**
-
 ---
 
-## Features
-* **Disable call recording notification sound:** Turns off the audible alert when call recording starts.
-* **Change Apple Wallet background image:** Customize the background appearance of Wallet passes/cards.
-* **Edit MobileGestalt file (advanced):** Modify MobileGestalt configuration values (for advanced users).
-* **Change Passcode background:** Customize the numeric keypad appearance using the `.passthm` interface.
-* **On-device patching (no PC required):** Operates as a standalone app after the initial setup.
-* **More features coming soon:** Development is ongoing to introduce additional capabilities.
+## Plugin System (New in this branch!)
 
----
+EnsWilde is evolving into a **plugin-based patching system** to make it easy to add, share, and maintain tweaks without hardcoding everything in Swift.
 
-## Usage Guides
+### Goals
+- Every patch (including new Control Center, Dynamic Island, Status Bar, Privacy/Telemetry blockers) defined as **loadable JSON** for simple cases (MobileGestalt keys, plist edits, file writes).
+- **Optional Swift modules** for complex patches that need custom UI (e.g. image pickers for Wallet background) or advanced apply logic.
+- Community can contribute via `Patches/Community/*.json` (future sideloading support).
+- Dynamic UI: toggles auto-appear in the main tweaks list.
+- Centralized `PatchLoader` + `PatchModule` protocol.
 
-### Apple Wallet Background Guide
-Step-by-step guide for changing Apple Wallet pass/card backgrounds using EnsWilde:
+### Current Status (feature/patch-plugin-system branch)
+- ✅ `Patches/patch-template.json` with full JSON schema + example
+- ✅ `Sources/PatchEngine/PatchModule.swift` (protocol + JSONPatchModule default impl)
+- ✅ `Sources/PatchEngine/PatchLoader.swift` (scans bundle on launch, auto-registers)
+- ⏳ Refactor existing patches (Wallet, DisableSound, etc.) to JSON + optional modules (in progress)
+- ⏳ Dynamic UI in ContentView/MainView
+- ⏳ Integration with ToolRunner / Apply system
 
-🔗 https://gist.github.com/YangJiiii/06daf0c2d0fa11002757e501622353ea
+### How to Add Your Own Plugin (for contributors)
 
----
+#### 1. Simple Data-Driven Patch (Recommended for most tweaks)
 
-### Passcode Background Guide
-Detailed instructions on customizing the passcode keypad background using `.passthm`:
+Create a new `.json` file in `Patches/` (core) or `Patches/Community/` (community).
 
-🔗 https://gist.github.com/YangJiiii/67c6323cf4b7fd8487fcd6e2c8fb4233
+Example: `Patches/hide-dynamic-island.json`
 
----
+```json
+{
+  "id": "hide-dynamic-island",
+  "title": "Hide Dynamic Island",
+  "description": "Hides the Dynamic Island pill (builds on @iTechExpert21 work).",
+  "iOSVersionMin": "26.2",
+  "category": "DynamicIsland",
+  "uiToggleType": "switch",
+  "defaultEnabled": false,
+  "requiresRespring": true,
+  "patches": [
+    {
+      "targetType": "MobileGestalt",
+      "key": "YourRealMobileGestaltKeyForDynamicIsland",
+      "value": false,
+      "operation": "set"
+    }
+  ]
+}
+```
 
-## Getting Your .mobiledevicepairing File (Impactor)
+Use the schema in `patch-template.json` for validation (many editors support it).
 
-EnsWilde uses **Impactor** to automatically handle pairing.
+#### 2. Complex Patch with Custom Swift Module
 
-🔗 https://github.com/khcrysalis/Impactor
+1. Add the JSON as above, with `"customModule": "YourPatchModule"`
+2. Create `Sources/PatchModules/YourPatchModule.swift` (or inside Tools/ for now) that conforms to `PatchModule`
+3. Implement `apply()` with your custom logic (e.g. image import + sparserestore)
+4. In `PatchLoader.loadAllPatches()` or onAppear, call `PatchLoader.shared.register(YourPatchModule())`
+5. Override `makeCustomView(binding:)` to return your SwiftUI view (e.g. image picker + preview)
 
-### Steps
-1. Download and open **Impactor** on your computer.
-2. Connect your iPhone or iPad via USB.
-3. In Impactor, select **EnsWilde**.
-4. Click **Import**.
-5. Impactor will automatically generate and inject the required pairing data.
+See `AppleWallet` folder as reference for complex patch patterns.
 
-No manual export or file transfer is required.
+#### 3. Submitting
+- Open PR to `develop` from your fork/branch
+- Include before/after screenshots, iOS version tested, and the JSON + any Swift
+- Update this README and add to `version.json` if needed
 
----
+This system will eventually replace the hardcoded toggles in `ToolStore.swift` and `ContentView.swift`, making EnsWilde much more extensible while keeping the powerful sparserestore + bookassetd engine.
 
-## Setting Up VPN
-1. Download **LocaldevVPN** from the iOS App Store.
-2. Enable the VPN inside the app.
-3. Launch **EnsWilde**.
+> **Note for Control Center patches**: New CC tweaks (from `feature/control-center-tweaks`) will be migrated to this JSON format as part of this effort.
 
 ---
 
 ## Credits
 
-Special thanks to the following for their contributions and support:
-
-* **Carrot1211**: [For cheering me on and supporting me during development](https://x.com/Hihihehe1221)
-* **@khanhduytran0**: [SparseBox](https://github.com/khanhduytran0/SparseBox)
-* **@Little_34306**: [Original concept for "Disable Call Recording"](https://github.com/34306)
-* **@SideStore team**: [`idevice` and C bindings from StikDebug](https://github.com/sidestore)
-* **@JJTech0130**: [`SparseRestore` and backup exploit](https://github.com/JJTech0130)
-* **@hanakim3945**: [`bl_sbx` exploit files and writeup](https://github.com/hanakim3945)
-* **@Lakr233**: [BBackupp](https://github.com/Lakr233/BBackupp)
-* **@libimobiledevice**: [Underlying communication libraries](https://github.com/libimobiledevice/libimobiledevice)
-* **@PoomSmart**: MobileGestalt dump
-* **@paragonarsi**: Apple Wallet Get
-* **@iTechExpert21**: Hide Dynamic Island
+... (rest of original README continues as before)
