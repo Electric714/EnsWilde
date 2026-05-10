@@ -25,6 +25,78 @@ It operates as a standalone on-device application, functioning independently lik
 
 ---
 
+## Plugin System (New!)
+
+EnsWilde is evolving into a **plugin-based patching system** to make it easy to add, share, and maintain tweaks without hardcoding everything in Swift.
+
+### Goals
+- Turn **every patch** (including new Control Center, Dynamic Island, Status Bar & CC Enhancements, Privacy & Telemetry Blockers) into **loadable JSON** + optional Swift modules.
+- Simple patches (MobileGestalt/plist keys & values) defined purely in JSON.
+- Complex patches keep custom SwiftUI (e.g. image pickers) via optional conforming modules.
+- `PatchLoader` scans `Patches/` on launch and auto-registers toggles in the main UI.
+- Community contributions via `Patches/Community/`.
+
+### Implementation Steps Completed
+1. ✅ Created `Patches/` folder + `Patches/Community/` subfolder
+2. ✅ Defined clean JSON schema in `Patches/patch-template.json` (with fields: title, description, iOS version requirement, patches array for MobileGestalt/plist keys & values, UI toggle type, category, etc.)
+3. ✅ Added core files:
+   - `Sources/PatchEngine/PatchLoader.swift` (scans Patches/ on launch and auto-registers toggles)
+   - `Sources/PatchEngine/PatchModule.swift` (protocol + JSON default impl)
+4. ⏳ Refactor 1–2 existing patches (e.g. Wallet background or a simple MobileGestalt one) into JSON proof-of-concept (next)
+5. ⏳ Update main UI (ContentView/MainViewWithNavigation) to dynamically load plugins from PatchLoader
+6. ✅ Pushed everything + updated README with this guide
+7. ⏳ Merge back to develop after testing
+
+### JSON Schema Highlights
+See `Patches/patch-template.json` for the full schema and example. Key fields:
+- `id`, `title`, `description`
+- `iOSVersionMin`, `category` (UI, ControlCenter, DynamicIsland, Privacy, etc.)
+- `uiToggleType`: switch | slider | picker
+- `patches[]`: array of {targetType, targetPath, key, value, operation}
+- `customModule` (optional string for advanced Swift impl)
+
+### How to Add Your Own Plugin
+
+**For simple patches (most new features like CC toggles, telemetry blockers):**
+
+1. Create `Patches/YourPatchID.json` (or in Community/)
+2. Fill using the template. Example for a Control Center enhancement:
+```json
+{
+  "id": "cc-hide-some-module",
+  "title": "Hide Control Center Module X",
+  "description": "Removes a specific module from Control Center via plist/MobileGestalt patch.",
+  "iOSVersionMin": "26.2",
+  "category": "ControlCenter",
+  "uiToggleType": "switch",
+  "defaultEnabled": false,
+  "requiresRespring": true,
+  "patches": [
+    {
+      "targetType": "Plist",
+      "targetPath": "/var/mobile/Library/Preferences/com.apple.springboard.plist",
+      "key": "YourCCKeyHere",
+      "value": false,
+      "operation": "set"
+    }
+  ]
+}
+```
+
+**For complex patches (e.g. full Wallet background with custom UI):**
+- Use JSON for the data part + set `"customModule": "AppleWalletModule"`
+- Implement `Sources/PatchModules/YourModule.swift` conforming to `PatchModule`
+- Provide custom `makeCustomView` and `apply()` logic
+
+**Contributing**
+- PR against `develop`
+- Test on iOS 26.2b1 device with pairing + VPN
+- Update `version.json` build number if releasing
+
+This architecture will make adding the requested features (Dynamic Island customizer, Status Bar & CC Enhancements, Feature Flags expansion, Privacy & Telemetry Blockers, AFC File Explorer, etc.) much cleaner and community-friendly.
+
+---
+
 ## Usage Guides
 
 ### Apple Wallet Background Guide

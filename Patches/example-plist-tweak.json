@@ -1,0 +1,20 @@
+{
+  "id": "example-plist-tweak",
+  "title": "Example Plist Tweak",
+  "description": "Example of plist patch (for POC demonstration)",
+  "iOSVersionMin": "26.2",
+  "category": "UI",
+  "defaultEnabled": false,
+  "requiresRespring": true,
+  "uiToggleType": "switch",
+  "patchDefinitions": [
+    {
+      "targetType": "Plist",
+      "targetPath": "/var/mobile/Library/Preferences/com.apple.springboard.plist",
+      "key": "exampleKey",
+      "value": true,
+      "operation": "set"
+    }
+  ],
+  "customModuleName": null
+}

@@ -62,6 +62,9 @@ struct MyApp: App {
 
         // Request notification permission at launch
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        
+        // Load plugin patches for the new dynamic patch system (POC)
+        PatchLoader.shared.loadAllPatches()
     }
 
     var body: some Scene {

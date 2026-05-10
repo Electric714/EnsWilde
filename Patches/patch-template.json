@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EnsWilde Patch Definition Schema",
+  "description": "Defines loadable patches for EnsWilde. Supports data-driven MobileGestalt/Plist/File patches via JSON, and optional custom Swift modules for complex UI/apply logic (e.g. Wallet image picker).\n\nPlace simple patches in Patches/ (core) or Patches/Community/ (future user-contributed, loaded from Documents if enabled).\nContribute complex ones by adding JSON + optional Sources/PatchModules/YourPatch.swift conforming to PatchModule protocol.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "iOSVersionMin": { "type": "string", "example": "26.2" },
+    "category": {
+      "type": "string",
+      "enum": ["UI", "Sound", "Privacy", "ControlCenter", "Wallet", "Theme", "Advanced", "DynamicIsland"]
+    },
+    "uiToggleType": {
+      "type": "string",
+      "enum": ["switch", "slider", "picker"],
+      "default": "switch"
+    },
+    "defaultEnabled": { "type": "boolean", "default": false },
+    "requiresRespring": { "type": "boolean", "default": true },
+    "patches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetType": { "type": "string", "enum": ["MobileGestalt", "Plist", "FileWrite", "Custom"] },
+          "targetPath": { "type": "string", "description": "Plist path or destination for FileWrite" },
+          "key": { "type": "string" },
+          "value": { "description": "Flexible value: bool, string, number, dict, array" },
+          "operation": { "type": "string", "enum": ["set", "remove"], "default": "set" }
+        },
+        "required": ["targetType", "key"]
+      }
+    },
+    "customModule": { "type": "string", "description": "Optional: name of Swift type conforming to PatchModule for custom behavior" }
+  },
+  "required": ["id", "title", "description", "patches"],
+  "example": {
+    "id": "example-mobile-gestalt-toggle",
+    "title": "Example MobileGestalt Patch",
+    "description": "Demonstrates setting a MobileGestalt key (replace with real key for your patch).",
+    "iOSVersionMin": "26.2",
+    "category": "Advanced",
+    "uiToggleType": "switch",
+    "defaultEnabled": false,
+    "requiresRespring": true,
+    "patches": [
+      {
+        "targetType": "MobileGestalt",
+        "key": "YourMobileGestaltKeyHere",
+        "value": true,
+        "operation": "set"
+      }
+    ]
+  }
+}

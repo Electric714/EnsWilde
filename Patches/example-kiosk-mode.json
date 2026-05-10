@@ -1,0 +1,19 @@
+{
+  "id": "kiosk-mode",
+  "title": "Kiosk Mode",
+  "description": "Enable forced retail kiosk mode (MobileGestalt patch example for POC)",
+  "iOSVersionMin": "26.2",
+  "category": "Advanced",
+  "defaultEnabled": false,
+  "requiresRespring": true,
+  "uiToggleType": "switch",
+  "patchDefinitions": [
+    {
+      "targetType": "MobileGestalt",
+      "key": "ForcedRetailKioskMode",
+      "value": true,
+      "operation": "set"
+    }
+  ],
+  "customModuleName": null
+}
