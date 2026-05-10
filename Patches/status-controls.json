@@ -1,0 +1,11 @@
+{
+  "id": "status-controls",
+  "title": "Status & Controls",
+  "description": "Toggles for carrier name, AOD, Stage Manager, etc.",
+  "ios_version": "26.2b1",
+  "category": "StatusBar",
+  "toggles": [
+    {"key": "hideCarrier", "title": "Hide Carrier Name", "type": "bool"},
+    {"key": "customCarrier", "title": "Custom Carrier Text", "type": "string"}
+  ]
+}
