@@ -9,6 +9,7 @@ struct MainViewWithNavigation: View {
     @StateObject private var toolRunner = ToolRunner()
     @StateObject private var walletStore = AppleWalletStore()
     @StateObject private var featureFlagsStore = FeatureFlagsStore()
+    @StateObject private var patchLoader = PatchLoader.shared
     @State private var showApplySheet = false
     @State private var showStatusSheet = false
     @State private var isInNestedView = false
@@ -70,6 +71,7 @@ struct MainViewWithNavigation: View {
                     walletStore: walletStore,
                     themeStore: themeStore,
                     featureFlagsStore: featureFlagsStore,
+                    patchLoader: patchLoader,
                     isSystemReady: isSystemReady
                 )
                 .tabItem {
@@ -85,6 +87,7 @@ struct MainViewWithNavigation: View {
         }
         .onAppear {
             applyTintColor()
+            patchLoader.loadAllPatches()
         }
     }
     
@@ -110,6 +113,7 @@ struct ApplyTabView: View {
     @ObservedObject var walletStore: AppleWalletStore
     @ObservedObject var themeStore: PasscodeThemeStore
     @ObservedObject var featureFlagsStore: FeatureFlagsStore
+    @ObservedObject var patchLoader: PatchLoader
     var isSystemReady: Bool
 
     @State private var showUUIDAlert = false
@@ -130,6 +134,13 @@ struct ApplyTabView: View {
         if toolStore.themesUIEnabled { list.append((L("tool_themes_ui"), "paintbrush")) }
         if toolStore.zPatchCustomEnabled { list.append((L("tool_zpatch_custom"), "wrench.and.screwdriver")) }
         if featureFlagsStore.featureFlagsEnabled { list.append((L("tool_feature_flags"), "flag")) }
+        // Dynamic JSON patches (POC)
+        for patch in patchLoader.loadedPatches {
+            let enabledKey = "patch_\(patch.id)_enabled"
+            if UserDefaults.standard.bool(forKey: enabledKey) || patch.defaultEnabled {
+                list.append((patch.title, "star"))
+            }
+        }
         return list
     }
 
@@ -137,6 +148,7 @@ struct ApplyTabView: View {
         NavigationStack {
             Form {
                 enabledTweaksSection
+                dynamicPatchesSection
                 optionsSection
                 statusSection
                 applyButtonSection
@@ -181,6 +193,36 @@ struct ApplyTabView: View {
                     } icon: {
                         Image(systemName: tweak.1)
                             .foregroundStyle(.tint)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var dynamicPatchesSection: some View {
+        if !patchLoader.loadedPatches.isEmpty {
+            Section(header: Text("Dynamic Patches (POC - JSON loaded)")) {
+                ForEach(patchLoader.loadedPatches, id: \.id) { patch in
+                    let enabledKey = "patch_\(patch.id)_enabled"
+                    Toggle(isOn: Binding(
+                        get: { UserDefaults.standard.bool(forKey: enabledKey) || patch.defaultEnabled },
+                        set: { newValue in
+                            UserDefaults.standard.set(newValue, forKey: enabledKey)
+                            UserDefaults.standard.synchronize()
+                        }
+                    )) {
+                        VStack(alignment: .leading) {
+                            Text(patch.title)
+                            Text(patch.description)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    if patch.requiresRespring {
+                        Text("Requires respring")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
                     }
                 }
             }
@@ -269,6 +311,19 @@ struct ApplyTabView: View {
                 themeStore: themeStore,
                 featureFlagsStore: featureFlagsStore
             )
+
+            // POC: Apply dynamic JSON patches that are enabled
+            for patch in patchLoader.loadedPatches {
+                let enabledKey = "patch_\(patch.id)_enabled"
+                if UserDefaults.standard.bool(forKey: enabledKey) || patch.defaultEnabled {
+                    do {
+                        try await patch.apply()
+                        print("[Apply] Dynamic patch applied: \(patch.title)")
+                    } catch {
+                        print("[Apply] Dynamic patch failed: \(patch.title) - \(error)")
+                    }
+                }
+            }
 
             if case .success = toolRunner.state {
                 sendLocalNotification(title: "EnsWilde", body: L("apply_done"))
