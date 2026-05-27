@@ -20,6 +20,10 @@ struct Utils {
         return "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
     }
 
+    static func requiresVersion(_ major: Int) -> Bool {
+        return os.majorVersion >= major
+    }
+
     static func reservePort() throws -> Int {
         for p in 49152...65535 {
             if isPortAvailable(p) { return p }
