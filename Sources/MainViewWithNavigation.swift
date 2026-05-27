@@ -121,8 +121,7 @@ struct ApplyTabView: View {
     @State private var lastError: String?
 
     private var isRunning: Bool {
-        let state = toolRunner.state
-        if case .running = state { return true }
+        if case .running = toolRunner.state { return true }
         return false
     }
 
@@ -282,8 +281,7 @@ struct ApplyTabView: View {
     }
 
     private var statusText: String {
-        let state = toolRunner.state
-        switch state {
+        switch toolRunner.state {
         case .idle:
             if enabledTweaks.isEmpty {
                 return L("apply_enable_first")
