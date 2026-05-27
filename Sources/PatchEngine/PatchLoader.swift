@@ -25,7 +25,7 @@ final class PatchLoader: ObservableObject {
         // Requires adding Files app support or explicit import. For v1, bundled only.
         
         // 2. TODO: Register any built-in custom Swift modules here
-        // e.g. allPatches.append(AppleWalletModule() as any PatchModule)
+        // e.g. allPatches.append(WalletBackgroundModule())
         
         self.loadedPatches = allPatches
         print("[PatchLoader] Loaded \(allPatches.count) patches/modules on launch.")
