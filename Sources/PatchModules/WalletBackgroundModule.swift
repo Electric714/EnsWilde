@@ -4,7 +4,7 @@ import PhotosUI
 /// Example custom Swift module for full Wallet background with image picker UI.
 /// Conforms to PatchModule for dynamic loading and complex UI/apply logic.
 /// This demonstrates Phase 3: custom modules with rich SwiftUI (image picker) + real apply via SparseRestore.
-class WalletBackgroundModule: PatchModule, ObservableObject {
+class WalletBackgroundModule: NSObject, ObservableObject, PatchModule {
     let id = "wallet-background-custom"
     let title = "Custom Apple Wallet Background"
     let description = "Pick any photo as your Apple Wallet pass/card background. Uses full image picker UI and SparseRestore to push the image to the device."
@@ -20,8 +20,8 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
     
     // State for image picker and selected image
     @Published var selectedImage: UIImage? = nil
-    @State private var selectedPhotoItem: PhotosPickerItem? = nil
-    @State private var isPickerPresented = false
+    @Published var selectedPhotoItem: PhotosPickerItem? = nil
+    @Published var isPickerPresented = false
     
     func apply() async throws {
         guard let image = selectedImage else {
@@ -50,66 +50,69 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
         UserDefaults.standard.set(true, forKey: "patch_\(id)_applied")
     }
     
-    func makeCustomView(binding: Binding<Bool>) -> some View {
-        VStack(spacing: 16) {
-            Text("Custom Wallet Background")
-                .font(.headline)
-            
-            if let img = selectedImage {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxHeight: 220)
-                    .cornerRadius(12)
-                    .shadow(radius: 4)
-            } else {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.secondary.opacity(0.2))
-                    .frame(height: 180)
-                    .overlay(Text("No image selected").foregroundStyle(.secondary))
-            }
-            
-            Button {
-                self.isPickerPresented = true
-            } label: {
-                Label("Choose Photo from Library", systemImage: "photo.on.rectangle")
-            }
-            .buttonStyle(.borderedProminent)
-            
-            if selectedImage != nil {
-                Button(role: .destructive) {
-                    self.selectedImage = nil
-                } label: {
-                    Label("Clear Selection", systemImage: "trash")
+    @MainActor
+    func makeCustomView(binding: Binding<Bool>) -> AnyView {
+        AnyView(
+            VStack(spacing: 16) {
+                Text("Custom Wallet Background")
+                    .font(.headline)
+                
+                if let img = selectedImage {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 220)
+                        .cornerRadius(12)
+                        .shadow(radius: 4)
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.secondary.opacity(0.2))
+                        .frame(height: 180)
+                        .overlay(Text("No image selected").foregroundStyle(.secondary))
                 }
+                
+                Button {
+                    self.isPickerPresented = true
+                } label: {
+                    Label("Choose Photo from Library", systemImage: "photo.on.rectangle")
+                }
+                .buttonStyle(.borderedProminent)
+                
+                if selectedImage != nil {
+                    Button(role: .destructive) {
+                        self.selectedImage = nil
+                    } label: {
+                        Label("Clear Selection", systemImage: "trash")
+                    }
+                }
+                
+                Text("The selected image will be applied as your Wallet pass background using the SparseRestore exploit.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
-            
-            Text("The selected image will be applied as your Wallet pass background using the SparseRestore exploit.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-        .sheet(isPresented: $isPickerPresented) {
-            PhotosPicker(
-                selection: $selectedPhotoItem,
-                matching: .images,
-                photoLibrary: .shared()
-            ) {
-                Text("Select from Photos")
-            }
-            .onChange(of: selectedPhotoItem) { [self] newItem in
-                Task {
-                    if let data = try? await newItem?.loadTransferable(type: Data.self),
-                       let uiImage = UIImage(data: data) {
-                        await MainActor.run {
-                            self.selectedImage = uiImage
-                            self.isPickerPresented = false
+            .padding()
+            .sheet(isPresented: $isPickerPresented) {
+                PhotosPicker(
+                    selection: $selectedPhotoItem,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    Text("Select from Photos")
+                }
+                .onChange(of: selectedPhotoItem) { [self] oldValue, newValue in
+                    Task {
+                        if let data = try? await newValue?.loadTransferable(type: Data.self),
+                           let uiImage = UIImage(data: data) {
+                            await MainActor.run {
+                                self.selectedImage = uiImage
+                                self.isPickerPresented = false
+                            }
                         }
                     }
                 }
             }
-        }
+        )
     }
 }
 
