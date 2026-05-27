@@ -3,16 +3,13 @@ import UniformTypeIdentifiers
 import UIKit
 import Network
 
-// MARK: - ToolRunState (Missing enum restored)
+// MARK: - ToolRunState
 enum ToolRunState {
     case idle
     case running(String)
     case success
     case failed(String)
 }
-
-// MARK: - Main ContentView (Fully Restored + Split)
-// Uses extracted StatusSheet.swift, ApplySheet.swift, and ContentViewModel.swift
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -122,6 +119,10 @@ struct ContentView: View {
             heartbeatRunningBinding?.wrappedValue = heartbeatRunning
             ddiMountedBinding?.wrappedValue = ddiMounted
             viewModel.updatePairingFile(pairingFile)
+            runStartupChecksOnce()
+            checkForUpdate()
+            refreshSystemStatus()
+            startNetworkMonitoring()
         }
         .sheet(isPresented: statusSheet) {
             StatusSheet(
@@ -201,12 +202,6 @@ struct ContentView: View {
         } message: {
             Text("You already have a pairing file loaded. Do you want to replace it?")
         }
-        .onAppear {
-            runStartupChecksOnce()
-            checkForUpdate()
-            refreshSystemStatus()
-            startNetworkMonitoring()
-        }
         .onChange(of: scenePhase) { handleScenePhase($0) }
         .onDisappear {
             stopNetworkMonitoring()
@@ -222,11 +217,14 @@ struct ContentView: View {
             if pairingFile == nil {
                 Button(action: { showPairingFileImporter = true }) {
                     Label { VStack(alignment: .leading) { Text(L("pairing_file_missing")); Text(L("pairing_file_import_prompt")).font(.caption) } } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+                }
             }
             if !heartbeatRunning && pairingFile != nil {
                 Label { VStack(alignment: .leading) { Text(L("heartbeat_not_running")); Text(L("heartbeat_enable_vpn")).font(.caption) } } icon: { Image(systemName: "exclamationmark.triangle.fill") }
             }
-            if !ddiMounted && pairingFile != nil && heartbeatRunning { ddiStatusLabel }
+            if !ddiMounted && pairingFile != nil && heartbeatRunning {
+                ddiStatusLabel
+            }
         }
     }
 
@@ -266,24 +264,99 @@ struct ContentView: View {
         else if route == "FeatureFlags" { FeatureFlagsView(store: featureFlagsStore) }
     }
 
-    // MARK: - Logic Functions (restored + delegated to ViewModel where possible)
-    private func isApplyRunning(_ state: ToolRunState) -> Bool { if case .running = state { return true }; return false }
-    private func applyStatusText(_ state: ToolRunState) -> String {
-        if !_isSystemReady { return "System not ready" }
-        switch state { case .idle: return "Ready"; case .running(let name): return "Running \(name)…"; case .success: return "Done"; case .failed(let msg): return "Failed: \(msg)" }
+    // MARK: - Helper Functions (Minimal working implementations)
+    private func isApplyRunning(_ state: ToolRunState) -> Bool {
+        if case .running = state { return true }
+        return false
     }
 
-    private func runStartupChecksOnce() { /* full original logic can be restored here if needed */ }
-    private func handleFileImport(_ result: Result<URL, Error>) { /* full original logic */ }
-    private func importPairingFile(_ text: String) { pairingFile = text; savePairingFileToDocuments(text) }
-    private func autoLoadSideStorePairingIfNeeded() { /* ... */ }
-    private func savePairingFileToDocuments(_ text: String) { try? text.write(to: URL.documentsDirectory.appendingPathComponent("pairingFile.plist"), atomically: true, encoding: .utf8) }
-    private func resetPairing() { pairingFile = nil; heartbeatRunning = false; ddiMounted = false; viewModel.cancelPairingResetTimer() }
-    private func refreshSystemStatus() { viewModel.refreshSystemStatus(pairingFile: pairingFile) { newState, _ in ddiMounted = newState } }
-    private func startNetworkMonitoring() { /* ... */ }
-    private func stopNetworkMonitoring() { /* ... */ }
-    private func handleScenePhase(_ newPhase: ScenePhase) { /* ... */ }
-    private func handleUUIDCapture() { /* ... */ }
-    private func checkForUpdate() { /* ... */ }
-    private func respringNow() throws { try RespringHelper.respring() }
+    private func applyStatusText(_ state: ToolRunState) -> String {
+        if !_isSystemReady { return "System not ready" }
+        switch state {
+        case .idle: return "Ready"
+        case .running(let name): return "Running \(name)…"
+        case .success: return "Done"
+        case .failed(let msg): return "Failed: \(msg)"
+        }
+    }
+
+    private func runStartupChecksOnce() {
+        // TODO: Restore full startup logic if needed
+        autoLoadSideStorePairingIfNeeded()
+    }
+
+    private func handleFileImport(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let url):
+            do {
+                let text = try String(contentsOf: url)
+                if pairingFile != nil {
+                    pendingPairingFileText = text
+                    showPairingReplaceConfirm = true
+                } else {
+                    importPairingFile(text)
+                }
+            } catch {
+                lastError = "Failed to read pairing file: \(error.localizedDescription)"
+                showErrorAlert = true
+            }
+        case .failure(let error):
+            lastError = error.localizedDescription
+            showErrorAlert = true
+        }
+    }
+
+    private func importPairingFile(_ text: String) {
+        pairingFile = text
+        savePairingFileToDocuments(text)
+        refreshSystemStatus()
+    }
+
+    private func autoLoadSideStorePairingIfNeeded() {
+        // TODO: Implement SideStore auto-load if needed
+    }
+
+    private func savePairingFileToDocuments(_ text: String) {
+        let url = URL.documentsDirectory.appendingPathComponent("pairingFile.plist")
+        try? text.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    private func resetPairing() {
+        pairingFile = nil
+        heartbeatRunning = false
+        ddiMounted = false
+        viewModel.cancelPairingResetTimer()
+    }
+
+    private func refreshSystemStatus() {
+        viewModel.refreshSystemStatus(pairingFile: pairingFile) { newState, _ in
+            ddiMounted = newState
+        }
+    }
+
+    private func startNetworkMonitoring() {
+        // TODO: Implement network monitoring
+    }
+
+    private func stopNetworkMonitoring() {
+        // TODO: Implement network monitoring stop
+    }
+
+    private func handleScenePhase(_ newPhase: ScenePhase) {
+        if newPhase == .active {
+            refreshSystemStatus()
+        }
+    }
+
+    private func handleUUIDCapture() {
+        // TODO: Implement UUID capture from Books app
+    }
+
+    private func checkForUpdate() {
+        // TODO: Implement update check
+    }
+
+    private func respringNow() throws {
+        try RespringHelper.respring()
+    }
 }
