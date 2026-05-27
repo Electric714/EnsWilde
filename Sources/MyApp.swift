@@ -8,15 +8,12 @@ import UserNotifications
 
 @main
 struct MyApp: App {
-    // MARK: - Anti-Tamper Header
-    private static let antiTamperMessage: String = "Fuck you. Get out..."
-    
     private static var httpServer: HTTPServer?
 
     init() {
-        if Self.antiTamperMessage.isEmpty { return }
-        
         // Set global tint color from user preference (default #ef9f76)
+        // Using UIView.appearance for compatibility with UIKit components (Wallet, etc.)
+        // Modern SwiftUI .tint() is used in MainViewWithNavigation for primary views
         let hexString = UserDefaults.standard.string(forKey: "EnsWilde.userTintColor") ?? "#ef9f76"
         let tintColor = UIColor(Color(hex: hexString))
         UIView.appearance(whenContainedInInstancesOf: [UIWindow.self]).tintColor = tintColor
