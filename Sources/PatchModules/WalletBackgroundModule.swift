@@ -56,7 +56,7 @@ struct WalletBackgroundModule: PatchModule, ObservableObject {
         // AppleWalletStore.shared.loadCustomBackground(from: destURL)
     }
     
-    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View {
+    @ViewBuilder mutating func makeCustomView(binding: Binding<Bool>) -> some View {
         VStack(spacing: 16) {
             Text("Custom Wallet Background")
                 .font(.headline)
