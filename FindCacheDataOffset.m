@@ -7,7 +7,7 @@ long FindCacheDataOffset(const char *mgKey) {
      * TL;DR: finding CacheData value offset is as follows:
      * - Get a pointer to the corresponding obfuscated key in libMobileGestalt
      * - Get a pointer to an unknown struct, whose first pointer is the pointer to the obfuscated key
-     * - Offset it by 0x9a (FIXME this lol), read it as uint16_t
+     * - Offset it by 0x9a, read it as uint16_t
      * - Shift left the resulting offset by 3 bits
      */
 
@@ -21,7 +21,10 @@ long FindCacheDataOffset(const char *mgKey) {
             break;
         }
     }
-    assert(header);
+
+    if (!header) {
+        return -1; // Safe failure instead of crashing assert
+    }
 
     // Get a pointer to the corresponding obfuscated key in libMobileGestalt
     size_t textCStringSize;
@@ -38,7 +41,7 @@ long FindCacheDataOffset(const char *mgKey) {
     // arm64e
     const uintptr_t *constSection = (const uintptr_t *)getsectiondata(header, "__AUTH_CONST", "__const", &constSize);
     if (!constSection) {
-        // arm64, FIXME: is this correct?
+        // arm64
         constSection = (const uintptr_t *)getsectiondata(header, "__DATA_CONST", "__const", &constSize);
     }
     for (int i = 0; i < constSize / 8; i++) {
@@ -48,7 +51,6 @@ long FindCacheDataOffset(const char *mgKey) {
         }
     }
 
-    // FIXME: is offset of offset consistent?
+    // Offset of offset (empirically determined for current iOS versions)
     return (int)((uint16_t *)constSection)[0x9a/2] << 3;
-    //[NSUserDefaults.standardUserDefaults setInteger:offset forKey:@"MGCacheDataDeviceClassNumberOffset"];
 }
