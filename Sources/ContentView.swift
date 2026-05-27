@@ -3,14 +3,6 @@ import UniformTypeIdentifiers
 import UIKit
 import Network
 
-// MARK: - ToolRunState
-enum ToolRunState {
-    case idle
-    case running(String)
-    case success
-    case failed(String)
-}
-
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     

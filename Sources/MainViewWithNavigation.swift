@@ -121,7 +121,8 @@ struct ApplyTabView: View {
     @State private var lastError: String?
 
     private var isRunning: Bool {
-        if case .running = toolRunner.state { return true }
+        let state = toolRunner.state
+        if case .running = state { return true }
         return false
     }
 
@@ -281,7 +282,8 @@ struct ApplyTabView: View {
     }
 
     private var statusText: String {
-        switch toolRunner.state {
+        let state = toolRunner.state
+        switch state {
         case .idle:
             if enabledTweaks.isEmpty {
                 return L("apply_enable_first")
@@ -325,7 +327,8 @@ struct ApplyTabView: View {
                 }
             }
 
-            if case .success = toolRunner.state {
+            let state = toolRunner.state
+            if case .success = state {
                 sendLocalNotification(title: "EnsWilde", body: L("apply_done"))
                 try? await Task.sleep(nanoseconds: 8_000_000_000)
                 if toolStore.soundRespringEnabled {
@@ -337,7 +340,7 @@ struct ApplyTabView: View {
                 }
             }
 
-            if case .failed(let message) = toolRunner.state {
+            if case .failed(let message) = state {
                 sendLocalNotification(title: "EnsWilde", body: L("apply_failed").replacingOccurrences(of: "{message}", with: message))
                 lastError = message
                 showErrorAlert = true

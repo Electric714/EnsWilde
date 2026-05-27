@@ -149,12 +149,10 @@ struct MobileGestaltView: View {
         Section(header: Text(L("section_hardware_features"))) {
             Toggle(L("mg_boot_chime"), isOn: bindingForMGKeys(["QHxt+hGLaBPbQJbXiUJX3w"]))
             Toggle(L("mg_charge_limit"), isOn: bindingForMGKeys(["37NVydb//GP/GrhuTN+exg"]))
-                .disabled(Utils.requiresVersion(17))
             if UIDevice._hasHomeButton() {
                 Toggle(L("mg_tap_to_wake"), isOn: bindingForMGKeys(["yZf3GTRMGTuwSV/lD7Cagw"]))
             }
             Toggle(L("mg_camera_button"), isOn: bindingForMGKeys(["CwvKxM2cEogD3p+HYgaW0Q", "oOV1jhJbdV3AddkcCg0AEA"]))
-                .disabled(Utils.requiresVersion(18))
         }
     }
 
@@ -164,9 +162,7 @@ struct MobileGestaltView: View {
             Toggle(L("mg_disable_parallax"), isOn: bindingForMGKeys(["UIParallaxCapability"], type: Int.self, defaultValue: 1, enableValue: 0))
             Toggle(L("mg_stage_manager"), isOn: bindingForMGKeys(["qeaj75wk3HF4DwQ8qbIi7g"]))
             Toggle(L("mg_aod"), isOn: bindingForMGKeys(["j8/Omm6s1lsmTDFsXjsBfA", "2OOJf1VhaM7NxfRok3HbWQ"]))
-                .disabled(Utils.requiresVersion(18))
             Toggle(L("mg_aod_vibrancy"), isOn: bindingForMGKeys(["ykpu7qyhqFweVMKtxNylWA"]))
-                .disabled(Utils.requiresVersion(18))
         }
     }
 
@@ -177,7 +173,6 @@ struct MobileGestaltView: View {
             Toggle(L("mg_disable_region"), isOn: bindingForRegionRestriction())
             Toggle(L("mg_apple_pencil"), isOn: bindingForMGKeys(["yhHcB0iH0d1XzPO/CFd3ow"]))
             Toggle(L("mg_action_button"), isOn: bindingForMGKeys(["cT44WE1EohiwRzhsZ8xEsw"]))
-                .disabled(Utils.requiresVersion(17))
             Toggle(L("mg_crash_detection"), isOn: bindingForMGKeys(["HCzWusHQwZDea6nNhaKndw"]))
         }
     }
@@ -190,7 +185,6 @@ struct MobileGestaltView: View {
             Toggle(L("mg_security_research"), isOn: bindingForMGKeys(["XYlJKKkj2hztRP1NWWnhlw"]))
             Toggle(L("mg_metal_hud"), isOn: bindingForMGKeys(["EqrsVvjcYDdxHBiQmGhAWw"]))
             Toggle(L("mg_apple_intelligence"), isOn: bindingForAppleIntelligence())
-                .disabled(Utils.requiresVersion(18))
             Picker(L("mg_device_model"), selection: $productType) {
                 Text(L("mg_device_model_unchanged")).tag(MobileGestaltView.machineName())
                 if UIDevice.current.userInterfaceIdiom == .pad {
