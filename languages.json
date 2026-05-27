@@ -5,7 +5,7 @@
       "name": "English",
       "nativeName": "English",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/en.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/en.json",
       "translator": "YangJiii"
     },
     {
@@ -13,15 +13,15 @@
       "name": "Chinese (Simplified)",
       "nativeName": "简体中文",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/zh_CN.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/zh_CN.json",
       "translator": "Vzero"
     },
     {
       "code": "ru_RU",
       "name": "Russian",
-      "nativeName": "Русский",
+      "nativeName": "Русky",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/ru_RU.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/ru_RU.json",
       "translator": "🌸Владек"
     },
     {
@@ -29,7 +29,7 @@
       "name": "French",
       "nativeName": "Français",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/fr_FR.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/fr_FR.json",
       "translator": "louloupexe"
     },
     {
@@ -37,7 +37,7 @@
       "name": "Vietnamese",
       "nativeName": "Tiếng Việt",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/vi_VN.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/vi_VN.json",
       "translator": "YangJiii"
     },
     {
@@ -45,7 +45,7 @@
       "name": "Japanese",
       "nativeName": "日本語",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/ja_JP.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/ja_JP.json",
       "translator": "Yuki"
     },
     {
@@ -53,7 +53,7 @@
       "name": "Spanish",
       "nativeName": "Español",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/es_ES.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/es_ES.json",
       "translator": "d0nh3art"
     },
     {
@@ -61,7 +61,7 @@
       "name": "Arabic",
       "nativeName": "العربية",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/ar_SA.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/ar_SA.json",
       "translator": "Muamal Al-Dulaimi"
     },
     {
@@ -69,7 +69,7 @@
       "name": "Chinese (Traditional)",
       "nativeName": "繁體中文",
       "version": 1,
-      "downloadURL": "https://raw.githubusercontent.com/YangJiiii/EnsWilde/main/languages/zh_TW.json",
+      "downloadURL": "https://raw.githubusercontent.com/Electric714/EnsWilde/main/languages/zh_TW.json",
       "translator": "Toolspeter"
     }
   ]
