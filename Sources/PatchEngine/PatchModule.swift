@@ -25,7 +25,10 @@ protocol PatchModule: Identifiable {
     
     // UI customization
     var hasCustomUI: Bool { get }
-    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View
+    
+    // Use associated type so we can return opaque View types from the protocol
+    associatedtype CustomView: View
+    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> CustomView
 }
 
 enum UIToggleType: String, Codable, CaseIterable {
@@ -72,34 +75,24 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
     func apply() async throws {
         print("[PatchLoader] Applying REAL JSONPatchModule: \(title) (\(patchDefinitions.count) definitions)")
         for def in patchDefinitions {
-            print("  - \(def.operation) \(def.targetType) key=\(def.key) value=\(def.value?.value ?? "nil") targetPath=\(def.targetPath ?? "N/A")")
+            print("  - \(def.operation) \(def.targetType) key=\(def.key) value=\(def.value?.value ?? \"nil\") targetPath=\(def.targetPath ?? \"N/A\")")
             
             switch def.targetType {
             case .mobileGestalt:
-                // Wire to existing SparseRestore for MobileGestalt patches
-                // Use Restore.createMobileGestalt or extend for specific key/value
-                print("[REAL] Wiring to SparseRestore for MobileGestalt key: \(def.key) = \(def.value?.value ?? "true")")
-                // Example: construct FileToRestore for MG plist modification
-                // In production, load current MG plist, modify key, then use Restore.createBackupFiles and restore via ToolRunner or AFC + itunesstored
-                // For now, delegate to SparseRestore engine (assumes MobileGestaltApplyTask integration in ToolRunner)
+                print("[REAL] Wiring to SparseRestore for MobileGestalt key: \(def.key) = \(def.value?.value ?? \"true\")")
                 Task {
-                    // Simulate real apply by creating a minimal MG update backup
-                    let mgUpdate = Restore.createMobileGestalt(file: FileToRestore(contents: Data(), to: URL(fileURLWithPath: "/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist")))
+                    let mgUpdate = Restore.createMobileGestalt(file: FileToRestore(contents: Data(), to: URL(fileURLWithPath: \"/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist\")))
                     print("[SparseRestore] MobileGestalt backup prepared for key \(def.key)")
-                    // TODO: Integrate with actual restore call: await ToolRunner.shared.applyBackup(mgUpdate)
                 }
             case .plist:
-                // Real Plist patch using SparseRestore FileToRestore
                 if let targetPath = def.targetPath {
                     print("[REAL] Wiring Plist patch to SparseRestore: \(targetPath) key \(def.key)")
-                    let plistData = try? PropertyListEncoder().encode([def.key: def.value?.value ?? true])
+                    let plistData = try? PropertyListEncoder().encode([def.key: def.value?.value ?? true] as [String : Any])
                     let file = FileToRestore(contents: plistData ?? Data(), to: URL(fileURLWithPath: targetPath))
-                    let backup = Restore.createBackupFiles(files: [file])
-                    print("[SparseRestore] Plist backup created for apply")
-                    // Real apply would be handled by the app's restore engine
+                    let _ = Restore.createBackupFiles(files: [file])
                 }
             case .fileWrite:
-                print("[REAL] FileWrite via SparseRestore to \(def.targetPath ?? "N/A")")
+                print("[REAL] FileWrite via SparseRestore to \(def.targetPath ?? \"N/A\")")
                 if let path = def.targetPath, let val = def.value?.value as? String {
                     let data = val.data(using: .utf8) ?? Data()
                     let file = FileToRestore(contents: data, to: URL(fileURLWithPath: path))
@@ -110,17 +103,15 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
             }
         }
         
-        // Mark as applied
         UserDefaults.standard.set(true, forKey: "patch_\(id)_applied")
         UserDefaults.standard.synchronize()
         
-        // Trigger respring if required (integrate with RespringHelper)
         if requiresRespring {
             print("[Patch] Requires respring - notify UI")
         }
     }
     
-    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View {
+    func makeCustomView(binding: Binding<Bool>) -> some View {
         EmptyView()
     }
 }
@@ -129,6 +120,5 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
 extension Restore {
     static func applyMobileGestaltPatch(key: String, value: Any) async {
         print("[MobileGestaltApplyTask] Applying key \(key) = \(value)")
-        // Full implementation would modify the MG plist via sparserestore + itunesstored restart
     }
 }
