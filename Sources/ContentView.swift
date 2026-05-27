@@ -209,9 +209,11 @@ struct ContentView: View {
             viewModel.cancelPairingResetTimer()
         }
     }
+}
 
-    // MARK: - Body Sections
-    @ViewBuilder private var statusSection: some View {
+// MARK: - Body Sections (Private Helpers)
+private extension ContentView {
+    @ViewBuilder var statusSection: some View {
         Section(header: Text(L("section_status"))) {
             CardRow(title: L("system_status"), subtitle: _isSystemReady ? L("system_status_ready") : L("system_status_not_ready"), ok: _isSystemReady, showChevron: false, trailing: nil)
             if pairingFile == nil {
@@ -228,11 +230,11 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder private var ddiStatusLabel: some View {
+    @ViewBuilder var ddiStatusLabel: some View {
         Label { VStack(alignment: .leading) { Text(L("ddi_not_mounted")) } } icon: { Image(systemName: "info.circle.fill") }
     }
 
-    @ViewBuilder private var tweaksSection: some View {
+    @ViewBuilder var tweaksSection: some View {
         Section(header: Text(L("section_tweaks"))) {
             toolNavigationLink(value: "MobileGestalt", title: L("tool_mobile_gestalt"), subtitle: L("tool_mobile_gestalt_desc"), icon: "cpu", isEnabled: toolStore.replaceMobileGestaltEnabled)
             toolNavigationLink(value: "ThemesUI", title: L("tool_themes_ui"), subtitle: L("tool_themes_ui_desc"), icon: "paintbrush", isEnabled: toolStore.themesUIEnabled)
@@ -244,7 +246,7 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder private func toolNavigationLink(value: String, title: String, subtitle: String, icon: String, isEnabled: Bool) -> some View {
+    @ViewBuilder func toolNavigationLink(value: String, title: String, subtitle: String, icon: String, isEnabled: Bool) -> some View {
         NavigationLink(value: value) {
             HStack {
                 Label { VStack(alignment: .leading, spacing: 2) { Text(title); Text(subtitle).font(.caption).foregroundStyle(.secondary) } } icon: { Image(systemName: icon) }
@@ -254,7 +256,7 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder private func destinationView(for route: String) -> some View {
+    @ViewBuilder func destinationView(for route: String) -> some View {
         if route == "DisableSound" { DisableSoundView() }
         else if route == "MobileGestalt" { MobileGestaltView(toolStore: toolStore) }
         else if route == "AppleWallet" { AppleWalletView(walletStore: walletStore) }
@@ -263,14 +265,16 @@ struct ContentView: View {
         else if route == "zPatchCustom" { zPatchCustomView() }
         else if route == "FeatureFlags" { FeatureFlagsView(store: featureFlagsStore) }
     }
+}
 
-    // MARK: - Helper Functions (Minimal working implementations)
-    private func isApplyRunning(_ state: ToolRunState) -> Bool {
+// MARK: - Helper Functions
+private extension ContentView {
+    func isApplyRunning(_ state: ToolRunState) -> Bool {
         if case .running = state { return true }
         return false
     }
 
-    private func applyStatusText(_ state: ToolRunState) -> String {
+    func applyStatusText(_ state: ToolRunState) -> String {
         if !_isSystemReady { return "System not ready" }
         switch state {
         case .idle: return "Ready"
@@ -280,12 +284,11 @@ struct ContentView: View {
         }
     }
 
-    private func runStartupChecksOnce() {
-        // TODO: Restore full startup logic if needed
+    func runStartupChecksOnce() {
         autoLoadSideStorePairingIfNeeded()
     }
 
-    private func handleFileImport(_ result: Result<URL, Error>) {
+    func handleFileImport(_ result: Result<URL, Error>) {
         switch result {
         case .success(let url):
             do {
@@ -306,57 +309,57 @@ struct ContentView: View {
         }
     }
 
-    private func importPairingFile(_ text: String) {
+    func importPairingFile(_ text: String) {
         pairingFile = text
         savePairingFileToDocuments(text)
         refreshSystemStatus()
     }
 
-    private func autoLoadSideStorePairingIfNeeded() {
+    func autoLoadSideStorePairingIfNeeded() {
         // TODO: Implement SideStore auto-load if needed
     }
 
-    private func savePairingFileToDocuments(_ text: String) {
+    func savePairingFileToDocuments(_ text: String) {
         let url = URL.documentsDirectory.appendingPathComponent("pairingFile.plist")
         try? text.write(to: url, atomically: true, encoding: .utf8)
     }
 
-    private func resetPairing() {
+    func resetPairing() {
         pairingFile = nil
         heartbeatRunning = false
         ddiMounted = false
         viewModel.cancelPairingResetTimer()
     }
 
-    private func refreshSystemStatus() {
+    func refreshSystemStatus() {
         viewModel.refreshSystemStatus(pairingFile: pairingFile) { newState, _ in
             ddiMounted = newState
         }
     }
 
-    private func startNetworkMonitoring() {
+    func startNetworkMonitoring() {
         // TODO: Implement network monitoring
     }
 
-    private func stopNetworkMonitoring() {
+    func stopNetworkMonitoring() {
         // TODO: Implement network monitoring stop
     }
 
-    private func handleScenePhase(_ newPhase: ScenePhase) {
+    func handleScenePhase(_ newPhase: ScenePhase) {
         if newPhase == .active {
             refreshSystemStatus()
         }
     }
 
-    private func handleUUIDCapture() {
+    func handleUUIDCapture() {
         // TODO: Implement UUID capture from Books app
     }
 
-    private func checkForUpdate() {
+    func checkForUpdate() {
         // TODO: Implement update check
     }
 
-    private func respringNow() throws {
+    func respringNow() throws {
         try RespringHelper.respring()
     }
 }
