@@ -75,13 +75,15 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
     func apply() async throws {
         print("[PatchLoader] Applying REAL JSONPatchModule: \(title) (\(patchDefinitions.count) definitions)")
         for def in patchDefinitions {
-            print("  - \(def.operation) \(def.targetType) key=\(def.key) value=\(def.value?.value ?? \"nil\") targetPath=\(def.targetPath ?? \"N/A\")")
+            let valueStr = def.value?.value != nil ? "\(def.value!.value)" : "nil"
+            print("  - \(def.operation) \(def.targetType) key=\(def.key) value=\(valueStr) targetPath=\(def.targetPath ?? "N/A")")
             
             switch def.targetType {
             case .mobileGestalt:
-                print("[REAL] Wiring to SparseRestore for MobileGestalt key: \(def.key) = \(def.value?.value ?? \"true\")")
+                let mgValue = def.value?.value != nil ? "\(def.value!.value)" : "true"
+                print("[REAL] Wiring to SparseRestore for MobileGestalt key: \(def.key) = \(mgValue)")
                 Task {
-                    let mgUpdate = Restore.createMobileGestalt(file: FileToRestore(contents: Data(), to: URL(fileURLWithPath: \"/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist\")))
+                    let mgUpdate = Restore.createMobileGestalt(file: FileToRestore(contents: Data(), to: URL(fileURLWithPath: "/var/containers/Shared/SystemGroup/systemgroup.com.apple.mobilegestaltcache/Library/Caches/com.apple.MobileGestalt.plist")))
                     print("[SparseRestore] MobileGestalt backup prepared for key \(def.key)")
                 }
             case .plist:
@@ -92,7 +94,7 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
                     let _ = Restore.createBackupFiles(files: [file])
                 }
             case .fileWrite:
-                print("[REAL] FileWrite via SparseRestore to \(def.targetPath ?? \"N/A\")")
+                print("[REAL] FileWrite via SparseRestore to \(def.targetPath ?? "N/A")")
                 if let path = def.targetPath, let val = def.value?.value as? String {
                     let data = val.data(using: .utf8) ?? Data()
                     let file = FileToRestore(contents: data, to: URL(fileURLWithPath: path))
