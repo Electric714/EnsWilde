@@ -287,4 +287,3 @@ struct ContentView: View {
     private func checkForUpdate() { /* ... */ }
     private func respringNow() throws { try RespringHelper.respring() }
 }
-} // Added closing brace for struct ContentView
