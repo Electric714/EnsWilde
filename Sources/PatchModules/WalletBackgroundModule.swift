@@ -4,7 +4,7 @@ import PhotosUI
 /// Example custom Swift module for full Wallet background with image picker UI.
 /// Conforms to PatchModule for dynamic loading and complex UI/apply logic.
 /// This demonstrates Phase 3: custom modules with rich SwiftUI (image picker) + real apply via SparseRestore.
-struct WalletBackgroundModule: PatchModule, ObservableObject {
+class WalletBackgroundModule: PatchModule, ObservableObject {
     let id = "wallet-background-custom"
     let title = "Custom Apple Wallet Background"
     let description = "Pick any photo as your Apple Wallet pass/card background. Uses full image picker UI and SparseRestore to push the image to the device."
@@ -56,7 +56,7 @@ struct WalletBackgroundModule: PatchModule, ObservableObject {
         // AppleWalletStore.shared.loadCustomBackground(from: destURL)
     }
     
-    @ViewBuilder mutating func makeCustomView(binding: Binding<Bool>) -> some View {
+    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View {
         VStack(spacing: 16) {
             Text("Custom Wallet Background")
                 .font(.headline)
