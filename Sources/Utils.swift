@@ -49,4 +49,28 @@ struct Utils {
         }
         return result == 0
     }
+
+    // New methods to fix build
+    static func ensureHTTPServerReady(timeoutSeconds: Int = 5) async throws {
+        let start = Date()
+        let url = URL(string: "http://127.0.0.1:\(port)/ping")!
+        while Date().timeIntervalSince(start) < Double(timeoutSeconds) {
+            do {
+                let (data, response) = try await URLSession.shared.data(from: url)
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    return
+                }
+            } catch {}
+            try await Task.sleep(nanoseconds: 200_000_000) // 0.2s
+        }
+        throw NSError(domain: "Utils", code: -1, userInfo: [NSLocalizedDescriptionKey: "HTTP server did not become ready within timeout"])
+    }
+
+    static func verifyLocalHTTPFileAccessible(pathComponent: String) async throws {
+        let url = URL(string: "http://127.0.0.1:\(port)/\(pathComponent)")!
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw NSError(domain: "Utils", code: -1, userInfo: [NSLocalizedDescriptionKey: "File not accessible: \(pathComponent)"])
+        }
+    }
 }
