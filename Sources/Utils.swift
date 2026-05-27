@@ -1,21 +1,28 @@
 import Foundation
 import UIKit
 
-// Test medium content push via Grok
-// This is a longer test to see payload limit
-// Line 1
-// Line 2
-// Line 3
-// Line 4
-// Line 5
-// Line 6
-// Line 7
-// Line 8
-// Line 9
-// Line 10
-// Line 11
-// Line 12
-// Line 13
-// Line 14
-// Line 15
-// EnsWilde build fix in progress
+struct Utils {
+    static var bgTask: UIBackgroundTaskIdentifier = .invalid
+    static var udid: String = ""
+    static var port: Int = 0
+    
+    static var os: OperatingSystemVersion {
+        return ProcessInfo.processInfo.operatingSystemVersion
+    }
+    
+    static func isIOSVersionSupported() -> Bool {
+        let v = os
+        // Support iOS 18.0 to 26.2 (current beta)
+        return (v.majorVersion >= 18 && v.majorVersion <= 26)
+    }
+    
+    static func getIOSVersionString() -> String {
+        let v = os
+        return "\(v.majorVersion).\(v.minorVersion)"
+    }
+    
+    static func reservePort() -> Int {
+        // Reserve a high port for local server
+        return Int.random(in: 49152...65535)
+    }
+}
