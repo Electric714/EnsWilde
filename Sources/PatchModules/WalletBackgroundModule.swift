@@ -44,7 +44,7 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
         let fileToRestore = FileToRestore(contents: imageData, to: walletPath, owner: 501, group: 501)
         let _ = Restore.createBackupFiles(files: [fileToRestore])
         
-        print("[SparseRestore] Wallet background backup prepared. In full integration: await ToolRunner.shared.restore(backup) + itunesstored restart")
+        print("[SparseRestore] Wallet background backup prepared. In full integration: await ToolRunner.shared.restore + itunesstored restart")
         
         UserDefaults.standard.set(destURL.path, forKey: "wallet_custom_background_path")
         UserDefaults.standard.set(true, forKey: "patch_\(id)_applied")
