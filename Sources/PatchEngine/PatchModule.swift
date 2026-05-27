@@ -25,7 +25,7 @@ protocol PatchModule: Identifiable {
     
     // UI customization
     var hasCustomUI: Bool { get }
-    @ViewBuilder mutating func makeCustomView(binding: Binding<Bool>) -> some View
+    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View
 }
 
 enum UIToggleType: String, Codable, CaseIterable {
@@ -120,7 +120,7 @@ struct JSONPatchModule: PatchModule, Identifiable, Codable {
         }
     }
     
-    @ViewBuilder mutating func makeCustomView(binding: Binding<Bool>) -> some View {
+    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View {
         EmptyView()
     }
 }
