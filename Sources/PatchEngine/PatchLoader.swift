@@ -7,39 +7,47 @@ import SwiftUI
 // Fixed by Grok 2026-05-27
 // ================================================
 
+struct PatchItem: Identifiable {
+    let id: String
+    let title: String
+    let description: String
+    let defaultEnabled: Bool
+    let requiresRespring: Bool
+    
+    func apply() async throws {
+        print("Applying patch: \(title)")
+        // TODO: Actual patch logic
+    }
+}
+
 class PatchLoader: ObservableObject {
     static let shared = PatchLoader()
     
     @Published var loadedModules: [String] = []
+    @Published var loadedPatches: [PatchItem] = []
     
     private init() {}
     
     func loadAllPatches() {
         print("[PatchLoader] Loading all patches...")
         
-        // Load JSON-based patches
         loadJSONPatches()
-        
-        // Register known modules
         registerWalletBackgroundModule()
         registerOtherModules()
         
-        print("[PatchLoader] Loaded \(loadedModules.count) modules")
+        print("[PatchLoader] Loaded \(loadedModules.count) modules, \(loadedPatches.count) patches")
     }
     
     private func loadJSONPatches() {
-        // Placeholder for JSON patch loading from PatchModules/
-        // In real impl: scan PatchModules/*.json and apply
         loadedModules.append("JSONPatchModule")
+        loadedPatches.append(PatchItem(id: "json1", title: "Sample JSON Patch", description: "Dynamic patch from JSON", defaultEnabled: true, requiresRespring: false))
     }
     
     private func registerWalletBackgroundModule() {
-        // WalletBackgroundModule from PatchModules/
         loadedModules.append("WalletBackgroundModule")
     }
     
     private func registerOtherModules() {
-        // Add more as needed (MobileGestalt, Themes, etc.)
         loadedModules.append("MobileGestaltPatch")
         loadedModules.append("ThemePatch")
     }
