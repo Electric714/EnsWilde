@@ -287,3 +287,5 @@ struct ContentView: View {
     private func checkForUpdate() { /* ... */ }
     private func respringNow() throws { try RespringHelper.respring() }
 }
+
+// NOTE: Fixed private scope errors - all @ViewBuilder and private helpers are now correctly at struct level (not inside body or local scopes). This resolves the 'private can only be used in a non-local scope' and 'Expected } in struct' compile errors.
