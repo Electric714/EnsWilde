@@ -1,0 +1,29 @@
+name: Build Unsigned .app + .ipa (Sideloading)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    - name: Build Unsigned Archive
+      run: xcodebuild clean archive -project EnsWilde.xcodeproj -scheme EnsWilde -configuration Release -archivePath EnsWilde.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY= DEVELOPMENT_TEAM= ONLY_ACTIVE_ARCH=NO
+    - name: Create .ipa
+      run: |
+        cp -r EnsWilde.xcarchive/Products/Applications/EnsWilde.app ./EnsWilde.app
+        mkdir -p Payload
+        cp -r EnsWilde.app Payload/
+        zip -r EnsWilde-unsigned.ipa Payload
+        rm -rf Payload EnsWilde.app EnsWilde.xcarchive
+    - uses: actions/upload-artifact@v4
+      with:
+        name: EnsWilde-unsigned.ipa
+        path: EnsWilde-unsigned.ipa
+        retention-days: 30
