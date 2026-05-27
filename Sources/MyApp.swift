@@ -35,7 +35,7 @@ struct MyApp: App {
             do {
                 Utils.port = try Utils.reservePort()
 
-                let server = HTTPServer(port: Utils.port)
+                let server = HTTPServer(port: UInt16(Utils.port))
                 Self.httpServer = server
 
                 await server.appendRoute("GET /*", to: DirectoryHTTPHandler(root: URL.documentsDirectory))
