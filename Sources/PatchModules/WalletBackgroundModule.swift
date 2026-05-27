@@ -34,29 +34,23 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
         
         print("[WalletBackgroundModule] REAL apply: Pushing custom wallet background (\(imageData.count) bytes) via SparseRestore")
         
-        // Real logic: Save locally and use SparseRestore to deploy to Wallet's data directory
         let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let walletCustomDir = docsURL.appendingPathComponent("WalletCustomBackgrounds")
         try FileManager.default.createDirectory(at: walletCustomDir, withIntermediateDirectories: true, attributes: nil)
         let destURL = walletCustomDir.appendingPathComponent("background_\(UUID().uuidString).jpg")
         try imageData.write(to: destURL)
         
-        // Wire to SparseRestore: create FileToRestore targeting wallet pass background location (example path; real would be /var/mobile/Library/Passes or AFC push)
         let walletPath = URL(fileURLWithPath: "/var/mobile/Library/Wallet/Backgrounds/custom_bg.jpg")
         let fileToRestore = FileToRestore(contents: imageData, to: walletPath, owner: 501, group: 501)
-        let backup = Restore.createBackupFiles(files: [fileToRestore])
+        let _ = Restore.createBackupFiles(files: [fileToRestore])
         
         print("[SparseRestore] Wallet background backup prepared. In full integration: await ToolRunner.shared.restore(backup) + itunesstored restart")
         
-        // Persist selection
         UserDefaults.standard.set(destURL.path, forKey: "wallet_custom_background_path")
         UserDefaults.standard.set(true, forKey: "patch_\(id)_applied")
-        
-        // Optional: notify AppleWalletStore to refresh
-        // AppleWalletStore.shared.loadCustomBackground(from: destURL)
     }
     
-    @ViewBuilder func makeCustomView(binding: Binding<Bool>) -> some View {
+    func makeCustomView(binding: Binding<Bool>) -> some View {
         VStack(spacing: 16) {
             Text("Custom Wallet Background")
                 .font(.headline)
@@ -76,7 +70,7 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
             }
             
             Button {
-                isPickerPresented = true
+                self.isPickerPresented = true
             } label: {
                 Label("Choose Photo from Library", systemImage: "photo.on.rectangle")
             }
@@ -84,7 +78,7 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
             
             if selectedImage != nil {
                 Button(role: .destructive) {
-                    selectedImage = nil
+                    self.selectedImage = nil
                 } label: {
                     Label("Clear Selection", systemImage: "trash")
                 }
@@ -104,13 +98,13 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
             ) {
                 Text("Select from Photos")
             }
-            .onChange(of: selectedPhotoItem) { newItem in
+            .onChange(of: selectedPhotoItem) { [self] newItem in
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
                         await MainActor.run {
-                            selectedImage = uiImage
-                            isPickerPresented = false
+                            self.selectedImage = uiImage
+                            self.isPickerPresented = false
                         }
                     }
                 }
@@ -120,4 +114,3 @@ class WalletBackgroundModule: PatchModule, ObservableObject {
 }
 
 // Note: Register this module in PatchLoader.loadAllPatches() or dynamically via register(WalletBackgroundModule())
-// Example registration: PatchLoader.shared.register(WalletBackgroundModule() as any PatchModule)
