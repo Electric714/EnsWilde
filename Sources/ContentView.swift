@@ -222,7 +222,6 @@ struct ContentView: View {
             if pairingFile == nil {
                 Button(action: { showPairingFileImporter = true }) {
                     Label { VStack(alignment: .leading) { Text(L("pairing_file_missing")); Text(L("pairing_file_import_prompt")).font(.caption) } } icon: { Image(systemName: "exclamationmark.triangle.fill") }
-                }
             }
             if !heartbeatRunning && pairingFile != nil {
                 Label { VStack(alignment: .leading) { Text(L("heartbeat_not_running")); Text(L("heartbeat_enable_vpn")).font(.caption) } } icon: { Image(systemName: "exclamationmark.triangle.fill") }
